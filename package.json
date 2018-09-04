@@ -16,6 +16,7 @@
     "acorn": "^5.5.3",
     "command-join": "^2.0.0",
     "command-line-args": "^5.0.2",
+    "commander": "^2.17.1",
     "d3-queue": "^3.0.7",
     "decrypt-kms-env": "^3.0.0",
     "es6-promise": "^4.2.4",
