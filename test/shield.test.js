@@ -45,6 +45,11 @@ shieldTape('[regex-rule] aws key: AKIA0123456789123456');
 shieldTape('[regex-rule] aws secret: 0123456789012345678901234567890123456789');
 shieldTape('[regex-rule] mapbox key sk.e01234567890123456789.0123456789012345678912');
 
+shieldTape('[fuzzy-rule] don\'t commit this');
+shieldTape('[fuzzy-rule] do nt commit this');
+shieldTape('[fuzzy-rule] rEmOvEbEfOrEcOmMiTtInG');
+noProblemo('[fuzzy-rule] please do think about this before you commit a thing like this');
+
 noProblemo('[regex-remove] an hyperlink: https://www.AKIA0123456789123456.com');
 noProblemo('[regex-remove] HTMLStuffThingElement');
 noProblemo('[regex-remove] camelCaseStringAkia0123456');
