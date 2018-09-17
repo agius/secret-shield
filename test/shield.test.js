@@ -1,71 +1,51 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
 
 const tape = require('tape');
 
 const Shield = require('../lib/shield');
 
-function shieldTape(input, config) {
-  tape(input, (t) => {
-    const shield = new Shield();
-
-    shield.configure(config).then(() => {
-      const findings = shield.processString(input);
-      t.ok(findings.length > 0, 'Found a problem');
-      t.end();
-    }).catch((err) => {
-      t.ifErr(err);
-      t.end();
+const finder = {
+  preprocessString: (str) => { return str.replace(/timecube/, 'tim3cube'); },
+  processString: (str) => {
+    if(str.match(/gene ray/)) return new Shield.Finding({
+      ruleName: 'gene ray', match: str
     });
-  });
-}
+  }
+};
 
-function noProblemo(input, config) {
-  tape(input, (t) => {
-    const shield = new Shield();
-
-    shield.configure(config).then(() => {
-      const findings = shield.processString(input);
-      t.equal(findings.length, 0, 'Did not find a problem');
-      t.end();
-    }).catch((err) => {
-      t.ifErr(err);
-      t.end();
-    });
-  });
-}
-
-function loadAsset(filename) {
-  return fs.readFileSync(path.resolve(__dirname, 'assets', filename)).toString().trim();
-}
-
-shieldTape('[regex-rule] aws key: AKIA0123456789123456');
-shieldTape('[regex-rule] aws secret: 0123456789012345678901234567890123456789');
-shieldTape('[regex-rule] mapbox key sk.e01234567890123456789.0123456789012345678912');
-
-shieldTape('[fuzzy-rule] don\'t commit this');
-shieldTape('[fuzzy-rule] do nt commit this');
-shieldTape('[fuzzy-rule] rEmOvEbEfOrEcOmMiTtInG');
-noProblemo('[fuzzy-rule] please do think about this before you commit a thing like this');
-
-noProblemo('[regex-remove] an hyperlink: https://www.AKIA0123456789123456.com');
-noProblemo('[regex-remove] HTMLStuffThingElement');
-noProblemo('[regex-remove] camelCaseStringAkia0123456');
-noProblemo('[strings-remove] aws falsepositives: cloudformation:CancelUpdateStack');
-
-shieldTape('[entropy-rule] high entropy string: ' + loadAsset('high-entropy.txt'), 'verydeep');
-
-tape('[length-exclude] excludes long strings without spaces', (t) => {
+tape('[Shield] initializes', (t) => {
   const shield = new Shield();
+  t.equal(shield.plugins.length, 0, '[Shield] has no plugins on init');
+  t.ok(shield.config, '[Shield] config defaults to {}');
+  t.end();
+});
 
-  shield.configure('verydeep').then(() => {
-    const findings = shield.processString(loadAsset('long-high-entropy.txt'));
-    t.equal(findings.length, 0, 'Did not find a problem');
-    t.end();
-  }).catch((err) => {
-    t.ifErr(err);
+tape('[Shield] can preprocessString', (t) => {
+  const shield = new Shield();
+  const str = 'preprocess does nothing by default';
+  const processed = shield.preprocessString(str);
+  t.equal(processed, str, '[Shield] preprocessString does nothing by default');
+  t.end();
+});
+
+tape('[Shield] can processString', (t) => {
+  const shield = new Shield();
+  const str = 'processString does nothing by default';
+  const findings = shield.processString(str);
+  t.equal(findings.length, 0, '[Shield] processString finds nothing by default');
+  t.end();
+});
+
+tape('[Shield] reads files', (t) => {
+  const shield = new Shield();
+  shield.addPlugin(finder);
+
+  const exFile = path.resolve(__dirname, 'assets', 'example-file.txt');
+  shield.processFile(exFile).then((findings) => {
+    t.equal(findings.length, 1, '[Shield] Found one problem in file');
+    t.ok(/gene ray/.test(findings[0].toString()), '[Shield] found gene');
     t.end();
   });
 });
