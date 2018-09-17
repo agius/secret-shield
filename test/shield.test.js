@@ -12,6 +12,9 @@ const finder = {
     if(str.match(/gene ray/)) return new Shield.Finding({
       ruleName: 'gene ray', match: str
     });
+  },
+  fileFilter: (str) => {
+    return /cannot-be/.test(str);
   }
 };
 
