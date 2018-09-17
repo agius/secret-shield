@@ -49,3 +49,16 @@ tape('[Shield] reads files', (t) => {
     t.end();
   });
 });
+
+tape('[Shield] reads directories', (t) => {
+  const shield = new Shield();
+  shield.addPlugin(finder);
+
+  const assetDir = path.resolve(__dirname, 'assets');
+  shield.processDirectory(assetDir).then((findings) => {
+    t.equal(findings.length, 2, '[Shield] Found one problem in dir');
+    t.ok(/gene ray/.test(findings[0].toString()), 'Shield found gene');
+    t.ok(/gene ray/.test(findings[1].toString()), 'Shield found gene in nested dir');
+    t.end();
+  });
+});
