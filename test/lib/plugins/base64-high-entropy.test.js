@@ -22,7 +22,7 @@ tape('[b64he-plugin] ignore low entropy', (t) => {
   const b64 = new B64HE();
   shield.addPlugin(b64);
 
-  const lowEntropy = ''.padEnd(85, 'a') + 'bbb==';
+  const lowEntropy = Buffer.alloc(85, 'a').toString() + 'bbb==';
 
   const findings = shield.processString('b64he token: ' + lowEntropy);
 
@@ -35,7 +35,7 @@ tape('[b64he-plugin] custom entropy setting', (t) => {
   const b64 = new B64HE({ minEntropy: 0.01 });
   shield.addPlugin(b64);
 
-  const medEntropy = ''.padEnd(85, 'a') + Math.random().toString(36).substring(2, 15) + '=';
+  const medEntropy = Buffer.alloc(85, 'a').toString() + Math.random().toString(36).substring(2, 15) + '=';
 
   const findings = shield.processString('b64he token: ' + medEntropy);
 

@@ -22,7 +22,7 @@ tape('[github-plugin] low-entropy github token', (t) => {
   const ghplug = new GithubPlugin(); // default entropy should be high enough to exclude
   shield.addPlugin(ghplug);
 
-  const findings = shield.processString('github token: ' + ''.padEnd(40, 'a'));
+  const findings = shield.processString('github token: ' + Buffer.alloc(40, 'a').toString());
 
   t.equal(findings.length, 0, 'did not find a problem');
   t.end();
@@ -33,7 +33,7 @@ tape('[github-plugin] custom entropy setting', (t) => {
   const ghplug = new GithubPlugin({minEntropy: 0.001});
   shield.addPlugin(ghplug);
 
-  const findings = shield.processString('github token: ' + 'b'.padEnd(40, 'a'));
+  const findings = shield.processString('github token: b' + Buffer.alloc(39, 'a').toString());
 
   t.equal(findings.length, 1, 'found a problem');
   t.ok(/ba+/.test(findings[0].toString()), 'finding matched input string');
