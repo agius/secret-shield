@@ -3,13 +3,12 @@
 const tape = require('tape');
 
 const Shield = require('../../../lib/shield');
-const Finding = require('../../../lib/finding');
 const AWSPlugin = require('../../../lib/plugins/aws');
 
 const finder = {
   processString: function(input) {
     const match = input.match(/(DescribeAutoScalingNotificationTypes)/i);
-    if(match) return new Finding({
+    if(match) return new Shield.Finding({
       ruleName: 'High-entropy word matched!',
       match: match
     });
