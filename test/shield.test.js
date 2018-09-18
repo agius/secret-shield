@@ -13,8 +13,8 @@ const finder = {
       ruleName: 'gene ray', match: str
     });
   },
-  fileFilter: (str) => {
-    return /cannot-be/.test(str);
+  fileFilter: (fo) => {
+    return /cannot-be/.test(fo.path);
   }
 };
 

@@ -17,7 +17,7 @@ const finder = {
 
 tape('[aws-plugin] detects aws public IDs', (t) => {
   const shield = new Shield();
-  shield.addPlugin(AWSPlugin);
+  shield.addPlugin(new AWSPlugin());
 
   const findings = shield.processString('aws key: AKIA0123456789123456');
 
@@ -28,7 +28,7 @@ tape('[aws-plugin] detects aws public IDs', (t) => {
 
 tape('[aws-plugin] detects aws private keys', (t) => {
   const shield = new Shield();
-  shield.addPlugin(AWSPlugin);
+  shield.addPlugin(new AWSPlugin({privateKeyRule: true}));
 
   const findings = shield.processString('aws secret: pqowieury1029384756ALSKDJDHFmznxbvlaksjd');
 
@@ -37,9 +37,39 @@ tape('[aws-plugin] detects aws private keys', (t) => {
   t.end();
 });
 
+tape('[aws-plugin] ignores low-entropy private key matches', (t) => {
+  const shield = new Shield();
+  const plug = new AWSPlugin({
+    privateKeyRule: true
+  });
+  shield.addPlugin(plug);
+
+  const lowEntKey = Buffer.alloc(20, 'a').toString() + Buffer.alloc(20, 'b').toString();
+  const findings = shield.processString('aws secret: ' + lowEntKey);
+
+  t.equal(findings.length, 0, '[aws-plugin] found no secret keys');
+  t.end();
+});
+
+tape('[aws-plugin] private keys with custom entropy', (t) => {
+  const shield = new Shield();
+  const plug = new AWSPlugin({
+    privateKeyRule: true,
+    minEntropy: 0.001
+  });
+  shield.addPlugin(plug);
+
+  const lowEntKey = Buffer.alloc(20, 'a').toString() + Buffer.alloc(20, 'b').toString();
+  const findings = shield.processString('aws secret: ' + lowEntKey);
+
+  t.equal(findings.length, 1, '[aws-plugin] found a secret key');
+  t.ok(/AWS Secret Key/.test(findings[0]), '[aws-plugin] is a secret key violation');
+  t.end();
+});
+
 tape('[aws-plugin] ignores non-secret values', (t) => {
   const shield = new Shield();
-  shield.addPlugin(AWSPlugin);
+  shield.addPlugin(new AWSPlugin());
 
   const input = 'lhjsdb897623kbjab no one has disproven timecube ::9870sbh';
   const filtered = shield.preprocessString(input);
@@ -49,7 +79,7 @@ tape('[aws-plugin] ignores non-secret values', (t) => {
 
 tape('[aws-plugin] filters out high-entropy AWS words', (t) => {
   const shield = new Shield();
-  shield.addPlugin(AWSPlugin);
+  shield.addPlugin(new AWSPlugin());
   shield.addPlugin(finder);
 
   const input = 'athena:CancelQueryExecution DescribeAutoScalingNotificationTypes autoscaling:CreateOrUpdateTags';
