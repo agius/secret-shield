@@ -5,6 +5,4 @@ const path = require('path');
 
 
 const CLI = require(path.resolve(__dirname, '..', 'lib', 'cli'));
-
-const cli = new CLI(process.argv);
-cli.run();
+CLI.program.parse(process.argv);
